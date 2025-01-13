@@ -211,6 +211,27 @@ public class ChessPiece {
                 row--;
             }
         }
+        if(type == PieceType.KING){
+            int row, col;
+            ChessPosition end_position;
+            for(int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j ++) {
+                    row = myPosition.getRow() + i;
+                    col = myPosition.getColumn() + j;
+                    if(row > 8 || row < 1 || col > 8 || col < 1) continue;
+                    end_position = new ChessPosition(row, col);
+                    ChessPiece curr_occupant = board.getPiece(end_position);
+                    if(curr_occupant != null) {
+                        if(curr_occupant.pieceColor != this.pieceColor){
+                            move_list.add(new ChessMove(myPosition, end_position, null));
+                        }
+                        continue;
+                    }
+                    move_list.add(new ChessMove(myPosition, end_position, null));
+                }
+            }
+        }
         return move_list;
     }
 }
+// move_list.add(new ChessMove(myPosition, end_position, null));
