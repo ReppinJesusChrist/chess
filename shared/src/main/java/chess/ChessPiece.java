@@ -69,7 +69,7 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ArrayList<ChessMove> move_list = new ArrayList<>();
-        if(type == PieceType.BISHOP){
+        if(type == PieceType.BISHOP || type == PieceType.QUEEN){
             int row, col;
             ChessPosition end_position;
 
@@ -142,7 +142,7 @@ public class ChessPiece {
                 col++;
             }
         }
-        if(type == PieceType.ROOK){
+        if(type == PieceType.ROOK || type == PieceType.QUEEN){
             int row, col;
             ChessPosition end_position;
 
