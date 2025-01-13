@@ -1,3 +1,9 @@
+/**
+ * TODO: Optimize PieceMoves()
+ *          Move end_position outside if statements
+ *          Combine redundant code (as found)
+ */
+
 package chess;
 
 import java.util.ArrayList;
@@ -231,7 +237,25 @@ public class ChessPiece {
                 }
             }
         }
+        if(type == PieceType.KNIGHT){
+            int row, col;
+            ChessPosition end_position;
+            int[][] direction_arr = {{1, 2},{2, 1},{2, -1},{1, -2},{-1, -2},{-2, -1},{-2, 1},{-1, 2}};
+            for(int[] i : direction_arr) {
+                row = myPosition.getRow() + i[0];
+                col = myPosition.getColumn() + i[1];
+                if(row > 8 || row < 1 || col > 8 || col < 1) continue;
+                end_position = new ChessPosition(row, col);
+                ChessPiece curr_occupant = board.getPiece(end_position);
+                if(curr_occupant != null) {
+                    if(curr_occupant.pieceColor != this.pieceColor){
+                        move_list.add(new ChessMove(myPosition, end_position, null));
+                    }
+                    continue;
+                }
+                move_list.add(new ChessMove(myPosition, end_position, null));
+            }
+        }
         return move_list;
     }
 }
-// move_list.add(new ChessMove(myPosition, end_position, null));
