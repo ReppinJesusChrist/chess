@@ -142,6 +142,75 @@ public class ChessPiece {
                 col++;
             }
         }
+        if(type == PieceType.ROOK){
+            int row, col;
+            ChessPosition end_position;
+
+            // Check all four directions:
+            // Right
+            row = myPosition.getRow();
+            col = myPosition.getColumn() + 1;
+            while(col <= 8){
+                end_position = new ChessPosition(row, col);
+                ChessPiece curr_occupant = board.getPiece(end_position);
+                if(curr_occupant != null) {
+                    if(curr_occupant.pieceColor != this.pieceColor){
+                        move_list.add(new ChessMove(myPosition, end_position, null));
+                    }
+                    break;
+                }
+                move_list.add(new ChessMove(myPosition, end_position, null));
+                col++;
+            }
+
+            // Up
+            row = myPosition.getRow() + 1;
+            col = myPosition.getColumn();
+            while(row <= 8){
+                end_position = new ChessPosition(row, col);
+                ChessPiece curr_occupant = board.getPiece(end_position);
+                if(curr_occupant != null) {
+                    if(curr_occupant.pieceColor != this.pieceColor){
+                        move_list.add(new ChessMove(myPosition, end_position, null));
+                    }
+                    break;
+                }
+                move_list.add(new ChessMove(myPosition, end_position, null));
+                row++;
+            }
+
+            // Left
+            row = myPosition.getRow();
+            col = myPosition.getColumn() - 1;
+            while(col >= 1){
+                end_position = new ChessPosition(row, col);
+                ChessPiece curr_occupant = board.getPiece(end_position);
+                if(curr_occupant != null) {
+                    if(curr_occupant.pieceColor != this.pieceColor){
+                        move_list.add(new ChessMove(myPosition, end_position, null));
+                    }
+                    break;
+                }
+                move_list.add(new ChessMove(myPosition, end_position, null));
+                col--;
+            }
+
+            // Down
+            row = myPosition.getRow() - 1;
+            col = myPosition.getColumn();
+            while(row >= 1){
+                end_position = new ChessPosition(row, col);
+                ChessPiece curr_occupant = board.getPiece(end_position);
+                if(curr_occupant != null) {
+                    if(curr_occupant.pieceColor != this.pieceColor){
+                        move_list.add(new ChessMove(myPosition, end_position, null));
+                    }
+                    break;
+                }
+                move_list.add(new ChessMove(myPosition, end_position, null));
+                row--;
+            }
+        }
         return move_list;
     }
 }
