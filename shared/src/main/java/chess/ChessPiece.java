@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -11,7 +12,26 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
+    private final ChessGame.TeamColor pieceColor;
+    private final PieceType type;
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        this.pieceColor = pieceColor;
+        this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return pieceColor == that.pieceColor && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
     }
 
     /**
@@ -30,14 +50,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return pieceColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return type;
     }
 
     /**
@@ -48,6 +68,50 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return new ArrayList<>();
+        ArrayList<ChessMove> move_list = new ArrayList<>();
+        if(type == PieceType.BISHOP){
+            int row, col;
+            ChessPosition end_position;
+
+            // Check all four diagonal directions:
+            // Up-Right
+            row = myPosition.getRow() + 1;
+            col = myPosition.getColumn() + 1;
+            while(row <= 8 && col <= 8){
+                end_position = new ChessPosition(row, col);
+                move_list.add(new ChessMove(myPosition, end_position, null));
+                row++;
+                col++;
+            }
+
+            // Up-Left
+            row = myPosition.getRow() + 1;
+            col = myPosition.getColumn() - 1;
+            while(row <= 8 && col >= 1){
+                end_position = new ChessPosition(row, col);
+                move_list.add(new ChessMove(myPosition, end_position, null));
+                row++;
+                col--;
+            }
+            // Down-Left
+            row = myPosition.getRow() - 1;
+            col = myPosition.getColumn() - 1;
+            while(row >= 1 && col >= 1){
+                end_position = new ChessPosition(row, col);
+                move_list.add(new ChessMove(myPosition, end_position, null));
+                row--;
+                col--;
+            }
+            // Down-Right
+            row = myPosition.getRow() - 1;
+            col = myPosition.getColumn() + 1;
+            while(row >= 1 && col <= 8){
+                end_position = new ChessPosition(row, col);
+                move_list.add(new ChessMove(myPosition, end_position, null));
+                row--;
+                col++;
+            }
+        }
+        return move_list;
     }
 }
