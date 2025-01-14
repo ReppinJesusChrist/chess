@@ -256,6 +256,58 @@ public class ChessPiece {
                 move_list.add(new ChessMove(myPosition, end_position, null));
             }
         }
+        if(type == PieceType.PAWN){
+            // TODO: Condense this code. Right now it seems way to long and wordy
+            boolean on_home_square = (myPosition.getRow() == (this.pieceColor == ChessGame.TeamColor.WHITE ? 2 : 7));
+            boolean ready_to_promote = (myPosition.getRow() == (this.pieceColor == ChessGame.TeamColor.WHITE ? 7 : 2));
+            boolean en_passant_row = (myPosition.getRow() == (this.pieceColor == ChessGame.TeamColor.WHITE ? 5 : 4));
+
+            // Identifies squares to check for capture potential and adds them if the capture is valid
+            int adv_inc = (this.pieceColor == ChessGame.TeamColor.WHITE ? 1 : -1); // Indicates advancement direction
+
+            if(myPosition.getColumn() < 8){
+                ChessPosition right_capture_square = new ChessPosition(
+                        myPosition.getRow() + adv_inc, myPosition.getColumn() + 1);
+                ChessPiece right_capture_piece = board.getPiece(right_capture_square);
+                if(right_capture_piece != null && right_capture_piece.pieceColor != this.pieceColor) {
+                    if(ready_to_promote) addPromotionMoves(move_list, myPosition, right_capture_square);
+                    else move_list.add(new ChessMove(myPosition, right_capture_square, null));
+                }
+            }
+
+            if(myPosition.getColumn() > 1){
+                ChessPosition left_capture_square = new ChessPosition(
+                        myPosition.getRow() + adv_inc, myPosition.getColumn() - 1);
+                ChessPiece left_capture_piece = board.getPiece(left_capture_square);
+                if(left_capture_piece != null && left_capture_piece.pieceColor != this.pieceColor)
+                    if(ready_to_promote) addPromotionMoves(move_list, myPosition, left_capture_square);
+                    else move_list.add(new ChessMove(myPosition, left_capture_square, null));
+            }
+
+            // Add single advance square if valid
+            ChessPosition single_adv_square = new ChessPosition(myPosition.getRow() + adv_inc,
+                    myPosition.getColumn());
+            if(board.getPiece(single_adv_square) == null){
+                if(ready_to_promote) addPromotionMoves(move_list, myPosition, single_adv_square);
+                else move_list.add(new ChessMove(myPosition, single_adv_square, null));
+                // Add double move if on home square
+                if(on_home_square){
+                    ChessPosition double_adv_square = new ChessPosition(myPosition.getRow() + 2 * adv_inc,
+                            myPosition.getColumn());
+                    if(board.getPiece(double_adv_square) == null){
+                        move_list.add(new ChessMove(myPosition, double_adv_square, null));
+                    }
+                }
+            }
+        }
         return move_list;
+    }
+
+    public static void addPromotionMoves(ArrayList<ChessMove> move_list, ChessPosition myPosition,
+                                         ChessPosition captureSquare){
+        move_list.add(new ChessMove(myPosition, captureSquare, PieceType.KNIGHT));
+        move_list.add(new ChessMove(myPosition, captureSquare, PieceType.BISHOP));
+        move_list.add(new ChessMove(myPosition, captureSquare, PieceType.ROOK));
+        move_list.add(new ChessMove(myPosition, captureSquare, PieceType.QUEEN));
     }
 }
