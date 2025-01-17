@@ -1,9 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -41,8 +38,54 @@ public class ChessBoard {
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
+     * TODO: Make this function more efficient (Maybe use a parser like in TestUtilities.LoadBoard())
      */
     public void resetBoard() {
+        // Pawns
+        for(int i = 1; i <= 8; ++i){
+            addPiece(new ChessPosition(2, i), new ChessPiece(
+                    ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(7, i), new ChessPiece(
+                    ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+        }
+        // Knights
+        addPiece(new ChessPosition(1, 2), new ChessPiece(
+                ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
+        addPiece(new ChessPosition(1, 7), new ChessPiece(
+                ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
+        addPiece(new ChessPosition(8, 2), new ChessPiece(
+                ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
+        addPiece(new ChessPosition(8, 7), new ChessPiece(
+                ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
+        // Bishops
+        addPiece(new ChessPosition(1, 3), new ChessPiece(
+                ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
+        addPiece(new ChessPosition(1, 6), new ChessPiece(
+                ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
+        addPiece(new ChessPosition(8, 3), new ChessPiece(
+                ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
+        addPiece(new ChessPosition(8, 6), new ChessPiece(
+                ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
+        // Rooks
+        addPiece(new ChessPosition(1, 1), new ChessPiece(
+                ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+        addPiece(new ChessPosition(1, 8), new ChessPiece(
+                ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+        addPiece(new ChessPosition(8, 1), new ChessPiece(
+                ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+        addPiece(new ChessPosition(8, 8), new ChessPiece(
+                ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+        // Queens
+        addPiece(new ChessPosition(1, 4), new ChessPiece(
+                ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
+        addPiece(new ChessPosition(8, 4), new ChessPiece(
+                ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
+        // Kings
+        addPiece(new ChessPosition(1, 5), new ChessPiece(
+                ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
+        addPiece(new ChessPosition(8, 5), new ChessPiece(
+                ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
+
         return;
     }
 
@@ -53,55 +96,6 @@ public class ChessBoard {
      * Likewise with the loadBoard() function. I implemented the reverse of the function below (in toString())
      * to demonstrate that I understand how the function works and that I'm not just ripping it off to save myself work.
      */
-    private static final Map<Character, ChessPiece.PieceType> CHAR_TO_TYPE_MAP = Map.of(
-            'p', ChessPiece.PieceType.PAWN,
-            'n', ChessPiece.PieceType.KNIGHT,
-            'r', ChessPiece.PieceType.ROOK,
-            'q', ChessPiece.PieceType.QUEEN,
-            'k', ChessPiece.PieceType.KING,
-            'b', ChessPiece.PieceType.BISHOP);
-
-    public static ChessBoard loadBoard(String boardText) {
-        var board = new ChessBoard();
-        int row = 8;
-        int column = 1;
-        for (var c : boardText.toCharArray()) {
-            switch (c) {
-                case '\n' -> {
-                    column = 1;
-                    row--;
-                }
-                case ' ' -> column++;
-                case '|' -> {
-                }
-                default -> {
-                    ChessGame.TeamColor color = Character.isLowerCase(c) ? ChessGame.TeamColor.BLACK
-                            : ChessGame.TeamColor.WHITE;
-                    var type = CHAR_TO_TYPE_MAP.get(Character.toLowerCase(c));
-                    var position = new ChessPosition(row, column);
-                    var piece = new ChessPiece(color, type);
-                    board.addPiece(position, piece);
-                    column++;
-                }
-            }
-        }
-        return board;
-    }
-
-    public static ChessBoard defaultBoard() {
-        return loadBoard("""
-                |r|n|b|q|k|b|n|r|
-                |p|p|p|p|p|p|p|p|
-                | | | | | | | | |
-                | | | | | | | | |
-                | | | | | | | | |
-                | | | | | | | | |
-                |P|P|P|P|P|P|P|P|
-                |R|N|B|Q|K|B|N|R|
-                """);
-    }
-
-
     private static final Map<ChessPiece.PieceType, Character> TYPE_TO_CHAR_MAP = Map.of(
             ChessPiece.PieceType.PAWN,'p',
             ChessPiece.PieceType.KNIGHT, 'n',
@@ -130,5 +124,19 @@ public class ChessBoard {
             bob.append("|\n");
         }
         return bob.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessBoard that = (ChessBoard) o;
+        return Objects.deepEquals(squares, that.squares);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(squares);
     }
 }
