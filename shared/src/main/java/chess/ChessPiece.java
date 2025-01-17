@@ -257,7 +257,7 @@ public class ChessPiece {
             }
         }
         if(type == PieceType.PAWN){
-            // TODO: Condense this code. Right now it seems way to long and wordy
+            // TODO: Condense this code. Right now it seems way too long and wordy
             boolean on_home_square = (myPosition.getRow() == (this.pieceColor == ChessGame.TeamColor.WHITE ? 2 : 7));
             boolean ready_to_promote = (myPosition.getRow() == (this.pieceColor == ChessGame.TeamColor.WHITE ? 7 : 2));
             boolean en_passant_row = (myPosition.getRow() == (this.pieceColor == ChessGame.TeamColor.WHITE ? 5 : 4));
@@ -309,5 +309,17 @@ public class ChessPiece {
         move_list.add(new ChessMove(myPosition, captureSquare, PieceType.BISHOP));
         move_list.add(new ChessMove(myPosition, captureSquare, PieceType.ROOK));
         move_list.add(new ChessMove(myPosition, captureSquare, PieceType.QUEEN));
+    }
+
+    @Override
+    public String toString() {
+        return switch (type) {
+            case KING -> (pieceColor == ChessGame.TeamColor.WHITE ? "K" : "k");
+            case QUEEN -> (pieceColor == ChessGame.TeamColor.WHITE ? "Q" : "q");
+            case ROOK -> (pieceColor == ChessGame.TeamColor.WHITE ? "R" : "r");
+            case BISHOP -> (pieceColor == ChessGame.TeamColor.WHITE ? "B" : "b");
+            case KNIGHT -> (pieceColor == ChessGame.TeamColor.WHITE ? "N" : "n");
+            case PAWN -> (pieceColor == ChessGame.TeamColor.WHITE ? "P" : "p");
+        };
     }
 }

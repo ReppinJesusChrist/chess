@@ -61,8 +61,21 @@ public class ChessMove {
 
     @Override
     public String toString() {
-        return startPosition +
-                "->" +
-                endPosition;
+        String rString = "";
+        rString += startPosition + "->" + endPosition;
+        if(promotionPiece != null){
+            ChessGame.TeamColor pieceColor = (endPosition.getRow() == 8 ?
+                    ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
+            String pString = switch (promotionPiece) {
+                case KING -> (pieceColor == ChessGame.TeamColor.WHITE ? "K" : "k");
+                case QUEEN -> (pieceColor == ChessGame.TeamColor.WHITE ? "Q" : "q");
+                case ROOK -> (pieceColor == ChessGame.TeamColor.WHITE ? "R" : "r");
+                case BISHOP -> (pieceColor == ChessGame.TeamColor.WHITE ? "B" : "b");
+                case KNIGHT -> (pieceColor == ChessGame.TeamColor.WHITE ? "N" : "n");
+                default -> throw new RuntimeException("Invalid Promotion Piece");
+            };
+            rString += pString;
+        }
+        return rString;
     }
 }
