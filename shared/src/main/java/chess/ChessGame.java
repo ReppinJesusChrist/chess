@@ -9,16 +9,19 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
+    TeamColor teamTurn;
+    ChessBoard boardState;
 
     public ChessGame() {
-
+        teamTurn = TeamColor.WHITE;
+        boardState = new ChessBoard();
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return teamTurn;
     }
 
     /**
@@ -27,7 +30,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        teamTurn = team;
     }
 
     /**
@@ -64,9 +67,23 @@ public class ChessGame {
      *
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
+     * TODO: FIRST
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        boolean isInCheck = false;
+        ChessPiece currPiece;
+        final ChessPosition kingPosition = findPiecePosition(teamColor, ChessPiece.PieceType.KING);
+        for(int row = 1; row <=8; ++row) {
+            for (int col = 1; col <= 8; ++col) {
+                currPiece = boardState.getPiece(new ChessPosition(row, col));
+                if(currPiece == null || currPiece.getTeamColor() == teamColor) continue;
+                Collection<ChessMove> currPieceMoves = currPiece.pieceMoves(boardState, new ChessPosition(row, col));
+                for(ChessMove c : currPieceMoves){
+                    if(c.getEndPosition().equals(kingPosition)) return true;
+                }
+            }
+        }
+        return isInCheck;
     }
 
     /**
@@ -96,7 +113,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        boardState = board;
     }
 
     /**
@@ -105,6 +122,22 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return boardState;
+    }
+
+    public ChessPosition findPiecePosition(TeamColor color, ChessPiece.PieceType piece){
+        ChessPiece currPiece;
+        ChessPosition currPosition;
+        for(int row = 1; row <=8; ++row) {
+            for (int col = 1; col <= 8; ++col) {
+                currPosition = new ChessPosition(row, col);
+                currPiece = boardState.getPiece(currPosition);
+                if(currPiece == null) continue;
+                if(currPiece.getTeamColor() == color && currPiece.getPieceType() == piece){
+                    return currPosition;
+                }
+            }
+        }
+        return null;
     }
 }
