@@ -49,7 +49,9 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        if(boardState.getPiece(startPosition) == null) return null;
+        Collection<ChessMove> moves;
+        throw new RuntimeException("Not finished");
     }
 
     /**
@@ -59,7 +61,25 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessBoard previousBoardState = boardState;
+        ChessPiece pieceToMove = boardState.getPiece(move.getStartPosition());
+        if (pieceToMove == null) throw new InvalidMoveException("There's no piece on this square to move");
+        if(pieceToMove.getTeamColor() != teamTurn) throw new InvalidMoveException("It's not this team's turn");
+        if(pieceToMove.pieceMoves(boardState, move.getStartPosition()).contains(move)){
+            if(boardState.getPiece(move.getEndPosition()) == null){
+                boardState.addPiece(move.getEndPosition(), pieceToMove);
+                boardState.removePiece(move.getStartPosition());
+            }
+            else capturePiece(move.getEndPosition(), pieceToMove);
+            changeTeamTurn();
+
+            if(isInCheck(pieceToMove.getTeamColor())){
+                boardState = previousBoardState;
+                changeTeamTurn();
+                throw new InvalidMoveException("This move puts the King in check!");
+            }
+
+        } else throw new InvalidMoveException("This move isn't part of the piece's moveset");
     }
 
     /**
@@ -67,12 +87,11 @@ public class ChessGame {
      *
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
-     * TODO: FIRST
      */
     public boolean isInCheck(TeamColor teamColor) {
         boolean isInCheck = false;
         ChessPiece currPiece;
-        final ChessPosition kingPosition = findPiecePosition(teamColor, ChessPiece.PieceType.KING);
+        final ChessPosition kingPosition = getPiecePosition(teamColor, ChessPiece.PieceType.KING);
         for(int row = 1; row <=8; ++row) {
             for (int col = 1; col <= 8; ++col) {
                 currPiece = boardState.getPiece(new ChessPosition(row, col));
@@ -93,7 +112,11 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPosition = getPiecePosition(teamColor, ChessPiece.PieceType.KING);
+        if(isInCheck(teamColor)){
+
+        }
+        return false;
     }
 
     /**
@@ -125,7 +148,7 @@ public class ChessGame {
         return boardState;
     }
 
-    public ChessPosition findPiecePosition(TeamColor color, ChessPiece.PieceType piece){
+    public ChessPosition getPiecePosition(TeamColor color, ChessPiece.PieceType piece){
         ChessPiece currPiece;
         ChessPosition currPosition;
         for(int row = 1; row <=8; ++row) {
@@ -139,5 +162,16 @@ public class ChessGame {
             }
         }
         return null;
+    }
+
+    // TODO: Use the result of removePiece to track captured pieces from both sides
+    public void capturePiece(ChessPosition capturePosition, ChessPiece capturer){
+        boardState.removePiece(capturePosition);
+        boardState.addPiece(capturePosition, capturer);
+    }
+
+    public void changeTeamTurn(){
+        if(teamTurn == TeamColor.WHITE) teamTurn = TeamColor.BLACK;
+        else teamTurn = TeamColor.WHITE;
     }
 }
