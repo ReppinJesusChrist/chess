@@ -158,6 +158,7 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         boardState = board;
+        resetTeamPieceArrays();
         populateTeamPieceArrays();
     }
 
@@ -189,6 +190,13 @@ public class ChessGame {
     // TODO: Use the result of removePiece to track captured pieces from both sides
     public void capturePiece(ChessPosition startPosition, ChessPosition capturePosition, ChessPiece capturer){
         boardState.removePiece(startPosition);
+        ChessPosition posToRemove = null;
+        ArrayList<ChessPosition> removeList = capturer.getTeamColor() == TeamColor.WHITE ?
+                blackPieceSquares : whitePieceSquares;
+        for (ChessPosition cp : removeList){
+            if(cp.equals(capturePosition)) posToRemove = cp;
+        }
+        removeList.remove(posToRemove);
         boardState.addPiece(capturePosition, capturer);
     }
 
@@ -212,6 +220,11 @@ public class ChessGame {
                 else blackPieceSquares.add(posToCheck);
             }
         }
+    }
+
+    public void resetTeamPieceArrays(){
+        whitePieceSquares.clear();
+        blackPieceSquares.clear();
     }
     /*
     public boolean isValidMove(ChessMove move){
