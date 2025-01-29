@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -11,10 +12,21 @@ import java.util.Collection;
 public class ChessGame {
     TeamColor teamTurn;
     ChessBoard boardState;
+    ArrayList<ChessPosition> whitePieceSquares, blackPieceSquares;
+
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
-        boardState = new ChessBoard();
+        whitePieceSquares = new ArrayList<>(16);
+        blackPieceSquares = new ArrayList<>(16);
+        setBoard(new ChessBoard());
+    }
+
+    public ArrayList<ChessPosition> getWhitePieceSquares() {
+        return whitePieceSquares;
+    }
+    public ArrayList<ChessPosition> getBlackPieceSquares() {
+        return blackPieceSquares;
     }
 
     /**
@@ -146,6 +158,7 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         boardState = board;
+        populateTeamPieceArrays();
     }
 
     /**
@@ -186,6 +199,19 @@ public class ChessGame {
 
     public boolean noValidMoves(TeamColor team){
         throw new RuntimeException("Not Implemented");
+    }
+
+    public void populateTeamPieceArrays(){
+        ChessPiece currPiece;
+        for(int i = 1; i <=8; ++i){
+            for(int j = 1; j <=8; ++j){
+                ChessPosition posToCheck = new ChessPosition(i,j);
+                currPiece = boardState.getPiece(posToCheck);
+                if(currPiece == null) continue;
+                if(currPiece.getTeamColor() == TeamColor.WHITE) whitePieceSquares.add(posToCheck);
+                else blackPieceSquares.add(posToCheck);
+            }
+        }
     }
     /*
     public boolean isValidMove(ChessMove move){
