@@ -61,16 +61,26 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
         ChessBoard previousBoardState = boardState;
         ChessPiece pieceToMove = boardState.getPiece(move.getStartPosition());
         if (pieceToMove == null) throw new InvalidMoveException("There's no piece on this square to move");
         if(pieceToMove.getTeamColor() != teamTurn) throw new InvalidMoveException("It's not this team's turn");
         if(pieceToMove.pieceMoves(boardState, move.getStartPosition()).contains(move)){
             if(boardState.getPiece(move.getEndPosition()) == null){
-                boardState.addPiece(move.getEndPosition(), pieceToMove);
                 boardState.removePiece(move.getStartPosition());
+                if(promotionPiece != null) boardState.addPiece(move.getEndPosition(), new ChessPiece(
+                        pieceToMove.getTeamColor(), promotionPiece
+                ));
+                else boardState.addPiece(move.getEndPosition(), pieceToMove);
             }
-            else capturePiece(move.getEndPosition(), pieceToMove);
+            else{
+                ChessPiece capturer;
+                if(promotionPiece == null) capturer = new ChessPiece(
+                        pieceToMove.getTeamColor(), pieceToMove.getPieceType());
+                else capturer = new ChessPiece(pieceToMove.getTeamColor(), promotionPiece);
+                capturePiece(move.getStartPosition(), move.getEndPosition(), capturer);
+            }
             changeTeamTurn();
 
             if(isInCheck(pieceToMove.getTeamColor())){
@@ -78,7 +88,6 @@ public class ChessGame {
                 changeTeamTurn();
                 throw new InvalidMoveException("This move puts the King in check!");
             }
-
         } else throw new InvalidMoveException("This move isn't part of the piece's moveset");
     }
 
@@ -127,7 +136,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return noValidMoves(teamColor) && isInCheck(teamColor);
     }
 
     /**
@@ -165,8 +174,8 @@ public class ChessGame {
     }
 
     // TODO: Use the result of removePiece to track captured pieces from both sides
-    public void capturePiece(ChessPosition capturePosition, ChessPiece capturer){
-        boardState.removePiece(capturePosition);
+    public void capturePiece(ChessPosition startPosition, ChessPosition capturePosition, ChessPiece capturer){
+        boardState.removePiece(startPosition);
         boardState.addPiece(capturePosition, capturer);
     }
 
@@ -174,4 +183,13 @@ public class ChessGame {
         if(teamTurn == TeamColor.WHITE) teamTurn = TeamColor.BLACK;
         else teamTurn = TeamColor.WHITE;
     }
+
+    public boolean noValidMoves(TeamColor team){
+        throw new RuntimeException("Not Implemented");
+    }
+    /*
+    public boolean isValidMove(ChessMove move){
+        return false;
+    }
+    */
 }
