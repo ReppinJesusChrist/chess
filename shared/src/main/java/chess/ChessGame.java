@@ -126,7 +126,7 @@ public class ChessGame {
                 boardState = previousBoardState;
                 changeTeamTurn();
                 throw new InvalidMoveException("The King is in check after this move is completed!");
-            }
+            }else adjustTeamListAfterMove(move);
         } else throw new InvalidMoveException("This move isn't part of the piece's moveset");
     }
 
@@ -226,6 +226,17 @@ public class ChessGame {
         }
         removeList.remove(posToRemove);
         boardState.addPiece(capturePosition, capturer);
+    }
+
+    public void adjustTeamListAfterMove(ChessMove move){
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+        ChessPiece mover = boardState.getPiece(endPosition);
+        ArrayList<ChessPosition> moveList = mover.getTeamColor() == TeamColor.WHITE ?
+                whitePieceSquares : blackPieceSquares;
+        //ArrayList<ChessPosition> moveListCopy = new ArrayList<>(moveList);
+        moveList.remove(startPosition);
+        moveList.add(endPosition);
     }
 
     public void changeTeamTurn(){
