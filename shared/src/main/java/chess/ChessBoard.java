@@ -9,9 +9,20 @@ import java.util.*;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private final ChessPiece[][] squares = new ChessPiece[8][8];
+    private final ChessPiece[][] squares;
     public ChessBoard() {
+        this.squares = new ChessPiece[8][8];
+    }
 
+    // Copy constructor
+    public ChessBoard(ChessBoard original){
+        this.squares = new ChessPiece[8][8];
+        for(int i = 0; i < 8; ++i){
+            for(int j = 0; j < 8; ++j){
+                if(original.squares[i][j] == null) continue;
+                this.squares[i][j] = new ChessPiece(original.squares[i][j]);
+            }
+        }
     }
 
     /**

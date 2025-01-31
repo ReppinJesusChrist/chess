@@ -1,7 +1,9 @@
 package chess;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -20,6 +22,7 @@ public class ChessGame {
         whitePieceSquares = new ArrayList<>(16);
         blackPieceSquares = new ArrayList<>(16);
         setBoard(new ChessBoard());
+        resetGame();
     }
 
     public ArrayList<ChessPosition> getWhitePieceSquares() {
@@ -62,8 +65,32 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         if(boardState.getPiece(startPosition) == null) return null;
-        Collection<ChessMove> moves;
-        throw new RuntimeException("Not finished");
+
+        Collection<ChessMove> moves  = new ArrayList<>(
+                boardState.getPiece(startPosition).pieceMoves(boardState, startPosition
+                ));
+        ArrayList<ChessMove> validMoves = new ArrayList<>();
+        ChessBoard origBoardState = new ChessBoard(boardState);
+        for(ChessMove cm : moves){
+            try {
+                makeMove(cm);
+                validMoves.add(cm);
+                changeTeamTurn(); // Corrects for makeMove() auto changing team turn if it succeeds
+            }catch(InvalidMoveException e){
+                if(e.getMessage().equals("It's not this team's turn")){
+                    changeTeamTurn();
+                    try{
+                        makeMove(cm);
+                        validMoves.add(cm);
+                        changeTeamTurn(); // Corrects for makeMove() auto changing team turn if it succeeds
+                    } catch (InvalidMoveException ex) {
+                        //System.out.print(ex.getMessage());
+                    }
+                }
+            }
+            setBoard(origBoardState);
+        }
+        return validMoves;
     }
 
     /**
@@ -98,7 +125,7 @@ public class ChessGame {
             if(isInCheck(pieceToMove.getTeamColor())){
                 boardState = previousBoardState;
                 changeTeamTurn();
-                throw new InvalidMoveException("This move puts the King in check!");
+                throw new InvalidMoveException("The King is in check after this move is completed!");
             }
         } else throw new InvalidMoveException("This move isn't part of the piece's moveset");
     }
@@ -133,11 +160,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        ChessPosition kingPosition = getPiecePosition(teamColor, ChessPiece.PieceType.KING);
-        if(isInCheck(teamColor)){
-
-        }
-        return false;
+        return noValidTeamMoves(teamColor) && isInCheck(teamColor);
     }
 
     /**
@@ -148,7 +171,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        return noValidMoves(teamColor) && isInCheck(teamColor);
+        return noValidTeamMoves(teamColor) && !isInCheck(teamColor);
     }
 
     /**
@@ -157,7 +180,13 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        boardState = board;
+        boardState = new ChessBoard(board);
+        resetTeamPieceArrays();
+        populateTeamPieceArrays();
+    }
+
+    public void resetGame(){
+        boardState.resetBoard();
         resetTeamPieceArrays();
         populateTeamPieceArrays();
     }
@@ -187,7 +216,6 @@ public class ChessGame {
         return null;
     }
 
-    // TODO: Use the result of removePiece to track captured pieces from both sides
     public void capturePiece(ChessPosition startPosition, ChessPosition capturePosition, ChessPiece capturer){
         boardState.removePiece(startPosition);
         ChessPosition posToRemove = null;
@@ -205,8 +233,23 @@ public class ChessGame {
         else teamTurn = TeamColor.WHITE;
     }
 
-    public boolean noValidMoves(TeamColor team){
-        throw new RuntimeException("Not Implemented");
+    /**
+     * Determines if the given team has no valid moves (without checking whether the king is in check)
+     *
+     * @param team which team to check for valid moves. The list is assumed to only contain positions which have
+     *             pieces on them (not null)
+     * @return True if the specified team has no valid moves, otherwise false
+     */
+    public boolean noValidTeamMoves(TeamColor team){
+        final ArrayList<ChessPosition> teamPiecePositions = team == TeamColor.WHITE ?
+                whitePieceSquares : blackPieceSquares;
+        ArrayList<ChessPosition> tPPCopy = new ArrayList<>(teamPiecePositions);
+        for (ChessPosition p : tPPCopy) {
+            if (!validMoves(p).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void populateTeamPieceArrays(){
@@ -225,6 +268,18 @@ public class ChessGame {
     public void resetTeamPieceArrays(){
         whitePieceSquares.clear();
         blackPieceSquares.clear();
+    }
+
+    public Collection<ChessMove> getAllPossibleTeamMoves(TeamColor team){
+        ArrayList<ChessPosition> teamPiecePositions = team == TeamColor.WHITE ? whitePieceSquares : blackPieceSquares;
+        ChessPiece currPiece;
+        ArrayList<ChessMove> allMoves = new ArrayList<>();
+
+        for(ChessPosition c : teamPiecePositions){
+            currPiece = boardState.getPiece(c);
+            allMoves.addAll(currPiece.pieceMoves(boardState,c));
+        }
+        return allMoves;
     }
     /*
     public boolean isValidMove(ChessMove move){
