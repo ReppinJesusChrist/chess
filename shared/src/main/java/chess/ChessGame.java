@@ -137,17 +137,18 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        boolean isInCheck = false;
+        ArrayList<ChessPosition> otherTeamPositions = teamColor == TeamColor.WHITE ?
+                blackPieceSquares : whitePieceSquares;
         ChessPiece currPiece;
+        boolean isInCheck = false;
         final ChessPosition kingPosition = getPiecePosition(teamColor, ChessPiece.PieceType.KING);
-        for(int row = 1; row <=8; ++row) {
-            for (int col = 1; col <= 8; ++col) {
-                currPiece = boardState.getPiece(new ChessPosition(row, col));
-                if(currPiece == null || currPiece.getTeamColor() == teamColor) continue;
-                Collection<ChessMove> currPieceMoves = currPiece.pieceMoves(boardState, new ChessPosition(row, col));
-                for(ChessMove c : currPieceMoves){
-                    if(c.getEndPosition().equals(kingPosition)) return true;
-                }
+
+        for(ChessPosition p : otherTeamPositions){
+            currPiece = boardState.getPiece(p);
+            if(currPiece == null || currPiece.getTeamColor() == teamColor) continue;
+            Collection<ChessMove> currPieceMoves = currPiece.pieceMoves(boardState, p);
+            for(ChessMove c : currPieceMoves){
+                if(c.getEndPosition().equals(kingPosition)) return true;
             }
         }
         return isInCheck;
