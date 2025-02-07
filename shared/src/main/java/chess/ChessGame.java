@@ -1,9 +1,7 @@
 package chess;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -15,7 +13,7 @@ public class ChessGame {
     TeamColor teamTurn;
     ChessBoard boardState;
     ArrayList<ChessPosition> whitePieceSquares, blackPieceSquares;
-
+    ChessPosition enPassantablePawnPosition;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
@@ -23,11 +21,19 @@ public class ChessGame {
         blackPieceSquares = new ArrayList<>(16);
         setBoard(new ChessBoard());
         resetGame();
+        enPassantablePawnPosition = null;
     }
 
+    /**
+     * @return List of squares containing active white pieces
+     */
     public ArrayList<ChessPosition> getWhitePieceSquares() {
         return whitePieceSquares;
     }
+
+    /**
+     * @return List of squares containing active black pieces
+     */
     public ArrayList<ChessPosition> getBlackPieceSquares() {
         return blackPieceSquares;
     }
@@ -64,8 +70,9 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        if(boardState.getPiece(startPosition) == null) return null;
-
+        ChessPiece currPiece = boardState.getPiece(startPosition);
+        if(currPiece == null) return null;
+        if(currPiece.getPieceType() == ChessPiece.PieceType.PAWN){}
         Collection<ChessMove> moves  = new ArrayList<>(
                 boardState.getPiece(startPosition).pieceMoves(boardState, startPosition
                 ));
@@ -96,14 +103,15 @@ public class ChessGame {
     /**
      * Makes a move in a chess game
      *
-     * @param move chess move to preform
+     * @param move chess move to perform
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
         ChessBoard previousBoardState = boardState;
         ChessPiece pieceToMove = boardState.getPiece(move.getStartPosition());
-        if (pieceToMove == null) throw new InvalidMoveException("There's no piece on this square to move");
+
+        if(pieceToMove == null) throw new InvalidMoveException("There's no piece on this square to move");
         if(pieceToMove.getTeamColor() != teamTurn) throw new InvalidMoveException("It's not this team's turn");
         if(pieceToMove.pieceMoves(boardState, move.getStartPosition()).contains(move)){
             if(boardState.getPiece(move.getEndPosition()) == null){
@@ -126,7 +134,14 @@ public class ChessGame {
                 boardState = previousBoardState;
                 changeTeamTurn();
                 throw new InvalidMoveException("The King is in check after this move is completed!");
-            }else adjustTeamListAfterMove(move);
+            }else{
+                adjustTeamListAfterMove(move);
+                if(pieceToMove.getPieceType() == ChessPiece.PieceType.PAWN &&
+                        Math.abs(move.getStartPosition().getRow() - move.getEndPosition().getRow()) == 2
+                ){
+                    enPassantablePawnPosition = move.getEndPosition();
+                }
+            }
         } else throw new InvalidMoveException("This move isn't part of the piece's moveset");
     }
 

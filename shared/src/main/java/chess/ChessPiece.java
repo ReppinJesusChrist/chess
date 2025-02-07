@@ -20,29 +20,20 @@ public class ChessPiece {
 
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
+    private boolean canEnPasRight, canEnPasLeft;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
+        canEnPasRight = false;
+        canEnPasLeft = false;
     }
 
     public ChessPiece(ChessPiece original){
         this.pieceColor = original.pieceColor;
         this.type = original.type;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessPiece that = (ChessPiece) o;
-        return pieceColor == that.pieceColor && type == that.type;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(pieceColor, type);
+        this.canEnPasRight = original.canEnPasRight;
+        this.canEnPasLeft = original.canEnPasLeft;
     }
 
     /**
@@ -278,15 +269,18 @@ public class ChessPiece {
                     if(ready_to_promote) addPromotionMoves(move_list, myPosition, right_capture_square);
                     else move_list.add(new ChessMove(myPosition, right_capture_square, null));
                 }
+                if(canEnPasRight) move_list.add(new ChessMove(myPosition, right_capture_square, null));
             }
 
             if(myPosition.getColumn() > 1){
                 ChessPosition left_capture_square = new ChessPosition(
                         myPosition.getRow() + adv_inc, myPosition.getColumn() - 1);
                 ChessPiece left_capture_piece = board.getPiece(left_capture_square);
-                if(left_capture_piece != null && left_capture_piece.pieceColor != this.pieceColor)
+                if(left_capture_piece != null && left_capture_piece.pieceColor != this.pieceColor){
                     if(ready_to_promote) addPromotionMoves(move_list, myPosition, left_capture_square);
                     else move_list.add(new ChessMove(myPosition, left_capture_square, null));
+                }
+                if(canEnPasLeft) move_list.add(new ChessMove(myPosition, left_capture_square, null));
             }
 
             // Add single advance square if valid
@@ -315,6 +309,35 @@ public class ChessPiece {
         move_list.add(new ChessMove(myPosition, captureSquare, PieceType.ROOK));
         move_list.add(new ChessMove(myPosition, captureSquare, PieceType.QUEEN));
     }
+
+    /**
+     * @param b Whether the pawn can capture en passant to the right
+     */
+    public void setEnPasRight(boolean b){
+        canEnPasRight = b;
+    }
+
+    /**
+     * @param b Whether the pawn can capture en passant to the left
+     */
+    public void setEnPasLeft(boolean b){
+        canEnPasLeft = b;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return pieceColor == that.pieceColor && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
+    }
+
 
     @Override
     public String toString() {
