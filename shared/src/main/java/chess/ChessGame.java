@@ -165,7 +165,7 @@ public class ChessGame {
 
     /**
      * Determines if the given team is in stalemate, which here is defined as having
-     * no valid moves
+     * no valid moves and not being in check
      *
      * @param teamColor which team to check for stalemate
      * @return True if the specified team is in stalemate, otherwise false
@@ -175,7 +175,7 @@ public class ChessGame {
     }
 
     /**
-     * Sets this game's chessboard with a given board
+     * Sets this game's chessboard with a given board using the copy constructor in ChessBoard
      *
      * @param board the new board to use
      */
@@ -185,10 +185,14 @@ public class ChessGame {
         populateTeamPieceArrays();
     }
 
+    /**
+     * Resets the game back to the beginning so it's ready to be played as a new game
+     */
     public void resetGame(){
         boardState.resetBoard();
         resetTeamPieceArrays();
         populateTeamPieceArrays();
+        setTeamTurn(TeamColor.WHITE);
     }
 
     /**
@@ -200,6 +204,15 @@ public class ChessGame {
         return boardState;
     }
 
+    /**
+     * Finds and returns the position of a given piece on the current boardState
+     *  Presently this is only used to find the King, so it doesn't need to find more than a single instance. If I end
+     *  up changing that in the future I'll refactor this function.
+     * @param color The color of the piece to be found
+     * @param piece The type of piece to be found
+     * @return The ChessPosition of the specified piece.
+     *
+     */
     public ChessPosition getPiecePosition(TeamColor color, ChessPiece.PieceType piece){
         ChessPiece currPiece;
         ChessPosition currPosition;
@@ -216,6 +229,16 @@ public class ChessGame {
         return null;
     }
 
+    /**
+     * Handles the capture of a piece. This involves removing the captured piece both from the board and from its
+     *  respective teamPieceSquares list and moving the capturing piece to its new board position.
+     *
+     * @param startPosition The square that the capturing piece started on.
+     * @param capturePosition The square containing the piece that is going to be captured.
+     * @param capturer The ChessPiece that is doing the capturing.
+     *
+     * TODO: Remove @param capturer both here and in all calling functions
+     */
     public void capturePiece(ChessPosition startPosition, ChessPosition capturePosition, ChessPiece capturer){
         boardState.removePiece(startPosition);
         ChessPosition posToRemove = null;
@@ -228,27 +251,36 @@ public class ChessGame {
         boardState.addPiece(capturePosition, capturer);
     }
 
+    /**
+     * Updates the appropriate teamPieceSquares array after a ChessMove is made.
+     *
+     * @param move The move that will be used to update the teamPieceSquares array.
+     */
     public void adjustTeamListAfterMove(ChessMove move){
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
         ChessPiece mover = boardState.getPiece(endPosition);
         ArrayList<ChessPosition> moveList = mover.getTeamColor() == TeamColor.WHITE ?
                 whitePieceSquares : blackPieceSquares;
-        //ArrayList<ChessPosition> moveListCopy = new ArrayList<>(moveList);
+
         moveList.remove(startPosition);
         moveList.add(endPosition);
     }
 
+    /**
+     * Changes which team's turn it is
+     */
     public void changeTeamTurn(){
         if(teamTurn == TeamColor.WHITE) teamTurn = TeamColor.BLACK;
         else teamTurn = TeamColor.WHITE;
     }
 
     /**
-     * Determines if the given team has no valid moves (without checking whether the king is in check)
+     * Determines if the given team has no valid moves.
+     * This is done by iterating through the teamPieceSquares ArrayList and running validMoves() on each piece.
      *
-     * @param team which team to check for valid moves. The list is assumed to only contain positions which have
-     *             pieces on them (not null)
+     * @param team which team to check for valid moves. The team tracking list is assumed to only contain positions
+     *             which have pieces on them (not null)
      * @return True if the specified team has no valid moves, otherwise false
      */
     public boolean noValidTeamMoves(TeamColor team){
@@ -263,6 +295,9 @@ public class ChessGame {
         return true;
     }
 
+    /**
+     * Reads the current board state and updates the team piece tracking arrays
+     */
     public void populateTeamPieceArrays(){
         ChessPiece currPiece;
         for(int i = 1; i <=8; ++i){
@@ -276,25 +311,11 @@ public class ChessGame {
         }
     }
 
+    /**
+     * Empties the tracking arrays for currently active white and black pieces
+     */
     public void resetTeamPieceArrays(){
         whitePieceSquares.clear();
         blackPieceSquares.clear();
     }
-
-    public Collection<ChessMove> getAllPossibleTeamMoves(TeamColor team){
-        ArrayList<ChessPosition> teamPiecePositions = team == TeamColor.WHITE ? whitePieceSquares : blackPieceSquares;
-        ChessPiece currPiece;
-        ArrayList<ChessMove> allMoves = new ArrayList<>();
-
-        for(ChessPosition c : teamPiecePositions){
-            currPiece = boardState.getPiece(c);
-            allMoves.addAll(currPiece.pieceMoves(boardState,c));
-        }
-        return allMoves;
-    }
-    /*
-    public boolean isValidMove(ChessMove move){
-        return false;
-    }
-    */
 }
