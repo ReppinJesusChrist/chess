@@ -72,7 +72,13 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece currPiece = boardState.getPiece(startPosition);
         if(currPiece == null) return null;
-        if(currPiece.getPieceType() == ChessPiece.PieceType.PAWN){}
+        if(currPiece.getPieceType() == ChessPiece.PieceType.PAWN && enPassantablePawnPosition != null){
+            if(startPosition.getRow() == enPassantablePawnPosition.getRow()){
+                int dir_ind = startPosition.getColumn() - enPassantablePawnPosition.getColumn();
+                if(dir_ind == 1) currPiece.setEnPasLeft(true);
+                if(dir_ind == -1) currPiece.setEnPasRight(true);
+            }
+        }
         Collection<ChessMove> moves  = new ArrayList<>(
                 boardState.getPiece(startPosition).pieceMoves(boardState, startPosition
                 ));
@@ -140,7 +146,7 @@ public class ChessGame {
                         Math.abs(move.getStartPosition().getRow() - move.getEndPosition().getRow()) == 2
                 ){
                     enPassantablePawnPosition = move.getEndPosition();
-                }
+                }else enPassantablePawnPosition = null;
             }
         } else throw new InvalidMoveException("This move isn't part of the piece's moveset");
     }
