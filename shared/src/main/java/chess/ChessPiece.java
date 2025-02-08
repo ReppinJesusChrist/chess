@@ -269,7 +269,11 @@ public class ChessPiece {
                     if(ready_to_promote) addPromotionMoves(move_list, myPosition, right_capture_square);
                     else move_list.add(new ChessMove(myPosition, right_capture_square, null));
                 }
-                if(canEnPasRight) move_list.add(new ChessMove(myPosition, right_capture_square, null));
+                if(canEnPasRight){
+                    ChessMove enPasMove = new ChessMove(myPosition, right_capture_square, null);
+                    enPasMove.setIsEnPassant(true);
+                    move_list.add(enPasMove);
+                }
             }
 
             if(myPosition.getColumn() > 1){
@@ -280,7 +284,11 @@ public class ChessPiece {
                     if(ready_to_promote) addPromotionMoves(move_list, myPosition, left_capture_square);
                     else move_list.add(new ChessMove(myPosition, left_capture_square, null));
                 }
-                if(canEnPasLeft) move_list.add(new ChessMove(myPosition, left_capture_square, null));
+                if(canEnPasLeft){
+                    ChessMove enPasMove = new ChessMove(myPosition, left_capture_square, null);
+                    enPasMove.setIsEnPassant(true);
+                    move_list.add(enPasMove);
+                }
             }
 
             // Add single advance square if valid
@@ -337,7 +345,6 @@ public class ChessPiece {
     public int hashCode() {
         return Objects.hash(pieceColor, type);
     }
-
 
     @Override
     public String toString() {

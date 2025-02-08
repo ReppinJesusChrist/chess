@@ -120,7 +120,7 @@ public class ChessGame {
         if(pieceToMove == null) throw new InvalidMoveException("There's no piece on this square to move");
         if(pieceToMove.getTeamColor() != teamTurn) throw new InvalidMoveException("It's not this team's turn");
         if(pieceToMove.pieceMoves(boardState, move.getStartPosition()).contains(move)){
-            if(boardState.getPiece(move.getEndPosition()) == null){
+            if(boardState.getPiece(move.getEndPosition()) == null && !move.isEnPassant()){
                 boardState.removePiece(move.getStartPosition());
                 if(promotionPiece != null) boardState.addPiece(move.getEndPosition(), new ChessPiece(
                         pieceToMove.getTeamColor(), promotionPiece
@@ -132,7 +132,9 @@ public class ChessGame {
                 if(promotionPiece == null) capturer = new ChessPiece(
                         pieceToMove.getTeamColor(), pieceToMove.getPieceType());
                 else capturer = new ChessPiece(pieceToMove.getTeamColor(), promotionPiece);
-                capturePiece(move.getStartPosition(), move.getEndPosition(), capturer);
+                if(!move.isEnPassant())
+                    capturePiece(move.getStartPosition(), move.getEndPosition(), capturer);
+                else enPassantCapture(move.getStartPosition(), move.getEndPosition(), capturer);
             }
             changeTeamTurn();
 
@@ -271,6 +273,24 @@ public class ChessGame {
         }
         removeList.remove(posToRemove);
         boardState.addPiece(capturePosition, capturer);
+    }
+
+    /**
+     * Handles the en passant capture of a pawn.
+     */
+    public void enPassantCapture(ChessPosition capturerPosition, ChessPosition otherPawnPosition, ChessPiece capturer){
+        boardState.removePiece(capturerPosition);
+        ChessPosition posToRemove = null;
+        ArrayList<ChessPosition> removeList = capturer.getTeamColor() == TeamColor.WHITE ?
+                blackPieceSquares : whitePieceSquares;
+        int adv_inc = (capturer.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1); // Indicates advancement direction
+        for (ChessPosition cp : removeList){
+            if(cp.equals(otherPawnPosition)) posToRemove = cp;
+        }
+        removeList.remove(posToRemove);
+
+        ChessPosition newPosition = new ChessPosition(otherPawnPosition.getRow() - adv_inc, otherPawnPosition.getColumn());
+        boardState.addPiece(newPosition, capturer);
     }
 
     /**

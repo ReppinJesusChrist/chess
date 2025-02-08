@@ -13,12 +13,14 @@ public class ChessMove {
     private final ChessPosition startPosition;
     private final ChessPosition endPosition;
     private final ChessPiece.PieceType promotionPiece;
+    private boolean isEnPassant;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.promotionPiece = promotionPiece;
+        isEnPassant = false;
     }
 
     /**
@@ -43,6 +45,20 @@ public class ChessMove {
      */
     public ChessPiece.PieceType getPromotionPiece() {
         return promotionPiece;
+    }
+
+    /**
+     * @param b Whether this move is an en passant capture
+     */
+    public void setIsEnPassant(boolean b){
+        isEnPassant = b;
+    }
+
+    /**
+     * @return Whether this move is an en passant capture
+     */
+    public boolean isEnPassant(){
+        return isEnPassant;
     }
 
     @Override
